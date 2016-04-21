@@ -31,9 +31,9 @@ var acclib = (function AccModule() {
 	}
 		
 	return {
-		MakeFocusVisible: x,
-		CheckForMissingAltTags: y,
-		BuildBetterTitle: z
+		MakeFocusVisible: MakeFocusVisible,
+		CheckForMissingAltTags: CheckForMissingAltTags,
+		BuildBetterTitle: BuildBetterTitle
 	};			
 		
 })(); //END AccModule
