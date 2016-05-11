@@ -56,7 +56,7 @@ var acclib = (function AccModule() {
 	return {
 		AssignRoles: AssignRoles,
 		MakeFocusVisible: MakeFocusVisible,
-		CheckForMissingAltTags: CheckForMissingAltTags,
+		CheckAltTags: CheckAltTags,
 		BuildBetterTitle: BuildBetterTitle
 	};			
 		
