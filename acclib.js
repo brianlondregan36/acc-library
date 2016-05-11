@@ -1,5 +1,19 @@
 var acclib = (function AccModule() {
 
+	function AssignRoles(){
+		var pageArea = document.getElementsByClassName('pagearea'); 
+		if( pageArea ) {
+			pageArea[0].setAttribute("role", "main");
+		}
+		else {
+			console.log("Could not find a container in the layout to assign the main role")
+		}
+		var fieldsets = document.getElementsByTagName('fieldset');
+		for(var i = 0; i < fieldsets.length; i++){
+			fieldsets[i].setAttribute("role", "form");
+		}
+	}
+
 	function MakeFocusVisible() {
 		var css = 'select:focus, input:focus, textarea:focus, a:focus, button:focus { outline: 2px solid #6699ff !important; }';
 		var head = document.head || document.getElementsByTagName('head')[0];
@@ -31,6 +45,7 @@ var acclib = (function AccModule() {
 	}
 		
 	return {
+		AssignRoles: AssignRoles,
 		MakeFocusVisible: MakeFocusVisible,
 		CheckForMissingAltTags: CheckForMissingAltTags,
 		BuildBetterTitle: BuildBetterTitle
