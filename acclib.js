@@ -1,7 +1,5 @@
 var acclib = (function AccModule() {
 
-	var x = "a new change"; 
-
 	function MakeFocusVisible() {
 		var css = 'select:focus, input:focus, textarea:focus, a:focus, button:focus { outline: 2px solid #6699ff !important; }';
 		var head = document.head || document.getElementsByTagName('head')[0];
