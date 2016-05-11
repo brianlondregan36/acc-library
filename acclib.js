@@ -13,7 +13,9 @@ var acclib = (function AccModule() {
 			fieldsets[i].setAttribute("role", "form");
 		}
 	}
+	
 
+	
 	function MakeFocusVisible() {
 		var css = 'select:focus, input:focus, textarea:focus, a:focus, button:focus { outline: 2px solid #6699ff !important; }';
 		var head = document.head || document.getElementsByTagName('head')[0];
@@ -29,16 +31,23 @@ var acclib = (function AccModule() {
 
 		head.appendChild(style);
 	}
-	
-	function CheckForMissingAltTags() {
+		
+	function CheckAltTags() {
 		var elems = document.getElementsByTagName('img'); 
 		for(var i = 0; i < elems.length; i++) {
 			var a = elems[i].getAttribute('alt');
 			if( !a || a == "") {
 				console.log(elems[i].outerHTML + " is missing an Alt tag"); 
 			}
+			else if( a.toString().length > 125 ) {
+				console.log(elems[i].outerHTML + " needs a shorter Alt tag"); 
+			}
 		}
 	}
+	
+	
+	
+	
 	
 	function BuildBetterTitle(newTitle) {
 		document.title = newTitle;
