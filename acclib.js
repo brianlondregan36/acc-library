@@ -1,4 +1,4 @@
-var acclib = (function AccModule() {
+var acclib = (function AccModule() { 
 
 	function AssignRoles(){
 		var pageArea = document.getElementsByClassName('pagearea'); 
