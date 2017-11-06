@@ -9,10 +9,11 @@ var acclib = (function AccModule() {
 			console.log("Could not find a container in the layout to assign the main role")
 		}
 		var errors = document.getElementsByClassName('errorquestion');
-		var allErrors = errors.concat(document.getElementsByClassName('errorpage')); 
-		if( allErrors.length > 0 ) {
-			for(var i = 0; i < allErrors.legnth; i++) {
-				allErrors[i].setAttribute("role", "alert"); 
+		var moreerrors = document.getElementsByClassName('errorpage');
+		var allerrors = errors.concat(moreerrors); 
+		if( allerrors.length > 0 ) {
+			for(var i = 0; i < allerrors.legnth; i++) {
+				allerrors[i].setAttribute("role", "alert"); 
 			}
 		}
 		var fieldsets = document.getElementsByTagName('fieldset');
