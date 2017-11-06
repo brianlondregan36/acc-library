@@ -1,12 +1,19 @@
 var acclib = (function AccModule() { 
 
-	function AssignRoles(){
+	function AssignRoles() {
 		var pageArea = document.getElementsByClassName('pagearea'); 
 		if( pageArea ) {
 			pageArea[0].setAttribute("role", "main");
 		}
 		else {
 			console.log("Could not find a container in the layout to assign the main role")
+		}
+		var errors = document.getElementsByClassName('errorquestion');
+		errors = errors.concat(document.getElementsByClassName('errorpage')); 
+		if( errors.length > 0 ) {
+			for(var i = 0; i < errors.legnth; i++) {
+				errors[i].setAttribute("role", "alert"); 
+			}
 		}
 		var fieldsets = document.getElementsByTagName('fieldset');
 		for(var i = 0; i < fieldsets.length; i++){
