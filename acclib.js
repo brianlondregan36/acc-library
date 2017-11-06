@@ -9,7 +9,7 @@ var acclib = (function AccModule() {
 			console.log("Could not find a container in the layout to assign the main role")
 		}
 		var errors = document.getElementsByClassName('errorquestion');
-		if( allerrors.length > 0 ) {
+		if( errors.length > 0 ) {
 			Array.prototype.forEach.call(errors, function(error) {
 				error.setAttribute("role", "alert"); 
 			});
