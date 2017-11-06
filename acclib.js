@@ -73,16 +73,3 @@ var acclib = (function AccModule() {
 
 })(); //END AccModule
 
-
-
-
-	
-
-
-
-
-
-
-
-
-
