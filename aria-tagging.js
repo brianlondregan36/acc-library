@@ -49,7 +49,9 @@ Confirmit.page.questions.forEach(function(q,i) {
     RunErrorHandling(group, errorArea)
 
     group.onclick = SetAriaChecked;
-    group.onkeydown = KeyboardSupport; 
+    group.onkeydown = function(e) {
+      KeyboardSupport(e);
+    }; 
 
     function SetAriaChecked() {
       for(var i = 0; i < inputs.length; i++) {
@@ -160,7 +162,7 @@ function ToggleAlert(x, y) {
 }
 
 
-function KeyboardSupport() {
+function KeyboardSupport(e) {
   /*
   *handlers to use up, down and space bar to move around questions
   */
