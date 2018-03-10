@@ -54,8 +54,8 @@ Confirmit.page.questions.forEach(function(q,i) {
 
     function SetAriaChecked() {
       var selDiv = $(".cf-question#" + q.id + " .cf-single-answer--selected"); 
-      if(selDiv) {      
-        selDiv.setAttribute("aria-checked", "true"); 
+      if(selDiv[0]) {      
+        selDiv[0].setAttribute("aria-checked", "true"); 
       }
     }
   }//--------------------------------------------------------SINGLE-------------
