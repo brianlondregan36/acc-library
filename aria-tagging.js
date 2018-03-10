@@ -42,20 +42,23 @@ Confirmit.page.questions.forEach(function(q,i) {
       else {
         inputs[i].setAttribute("tabindex", "-1");
       }
-      inputs[i].setAttribute("aria-checked", "false"); 
     } 
     SetAriaChecked(); 
 
     var errorArea = document.getElementById(q.id + "_err");
     RunErrorHandling(group, errorArea)
 
-    group.click = SetAriaChecked;
+    group.onclick = SetAriaChecked;
     group.onkeydown = KeyboardSupport; 
 
     function SetAriaChecked() {
-      var selDiv = $(".cf-question#" + q.id + " .cf-single-answer--selected"); 
-      if(selDiv[0]) {      
-        selDiv[0].setAttribute("aria-checked", "true"); 
+      for(var i = 0; i < inputs.length; i++) {
+        if( inputs[i].className.indexOf("cf-single-answer--selected") != -1 ) {      
+          inputs[i].setAttribute("aria-checked", "true"); 
+        }
+        else {
+          inputs[i].setAttribute("aria-checked", "false");
+        }
       }
     }
   }//--------------------------------------------------------SINGLE-------------
