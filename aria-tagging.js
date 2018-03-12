@@ -18,6 +18,7 @@ Confirmit.page.questions.forEach(function(q,i) {
     if(q.required) {
       input.setAttribute("aria-required", "true");
     }
+
     var errorArea = document.getElementById(q.id + "_err");
     RunErrorHandling(input, errorArea)
   } //---------------------------------------------------------------OPEN-------
@@ -50,12 +51,12 @@ Confirmit.page.questions.forEach(function(q,i) {
 
     group.onclick = SetAriaChecked;
     group.onkeydown = function(e) {
-      KeyboardSupport(e);
+      KeyboardSupport(e, q.id, SetAriaChecked);
     }; 
 
     function SetAriaChecked() {
       for(var i = 0; i < inputs.length; i++) {
-        if( inputs[i].className.indexOf("cf-single-answer--selected") != -1 ) {      
+        if( inputs[i].className.indexOf("--selected") != -1 ) {      
           inputs[i].setAttribute("aria-checked", "true"); 
         }
         else {
@@ -162,7 +163,7 @@ function ToggleAlert(x, y) {
 }
 
 
-function KeyboardSupport(e) {
+function KeyboardSupport(e, qid, callback) {
   /*
   *handlers to use up, down and space bar to move around questions
   */
@@ -174,28 +175,18 @@ function KeyboardSupport(e) {
 
       var group = a.parentNode;
       var children = group.children;
-      var qid = a.getAttribute("id").split("_")[0];
 
       var k = e.keyCode;
       if( k == 38 || k == 40 ) {
 
-        var ans = Confirmit.page.getQuestion(qid).value;
-        var selected = document.getElementById(qid + "_" + ans);
-
-        //scan answers
-        var curr;
+        //scan through
+        var curr; 
         for(var i = 0; i < children.length; i++) {
           if(a == children[i]) {
-            curr = i;
-          }
-          if(children[i] == selected) {
-            selected.setAttribute("aria-checked", "true");
-          }
-          else if(children[i] != selected) {
-            selected.setAttribute("aria-checked", "false");
+            curr= i;
           }
         }
-
+      
         //move focus
         if(k == 38) {
           if(curr - 1 >= 0) {
@@ -212,8 +203,8 @@ function KeyboardSupport(e) {
       //set question
       if(k == 32) {
         code = a.getAttribute("id").split("_")[1];
-        Confirmit.page.getQuestion(qid).setValue(code);  //THIS NEEDS FIXING
-        a.setAttribute("aria-checked", "true");
+        Confirmit.page.getQuestion(qid).setValue(code);
+        callback(); 
       }
     }
   }
