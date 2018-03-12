@@ -24,10 +24,12 @@ Confirmit.page.questions.forEach(function(q,i) {
   } //---------------------------------------------------------------OPEN-------
 
   //SPECIFIC TO SINGLE QUESTIONS------------------------------------------------
-  if(q.type == "Single") {
-    var group = $(".cf-question#" + q.id + " .cf-list")[0];
+  if(q.type == "Single" || q.type == "Multi") {
     
-    group.setAttribute("role", "radiogroup");
+    var group = $(".cf-question#" + q.id + " .cf-list")[0];
+    q.type == "Single" ? (role1 = "radiogroup", role2 = "radio") : (role1 = "group", role2 = "checkbox");
+    
+    group.setAttribute("role", role1);
     group.setAttribute("aria-labelledby", q.instruction == "" ? q.id + "_txt" : q.id + "_ins");
     group.setAttribute("aria-errormessage", q.id + "_err");
     if(q.required) {
@@ -36,7 +38,7 @@ Confirmit.page.questions.forEach(function(q,i) {
 
     var inputs = group.children;
     for(var i = 0; i < inputs.length; i++) {
-      inputs[i].setAttribute("role", "radio");
+      inputs[i].setAttribute("role", role2);
       if(i == 0) {
         inputs[i].setAttribute("tabindex", "0");
       }
@@ -64,19 +66,7 @@ Confirmit.page.questions.forEach(function(q,i) {
         }
       }
     }
-  }//--------------------------------------------------------SINGLE-------------
-
-  //SPECIFIC TO MULTI QUESTIONS-------------------------------------------------
-  if(q.type == "Multi") {
-    var group = $(".cf-question#" + q.id + " .cf-list")[0]; 
-
-    group.setAttribute("role", "checkbox");
-    group.setAttribute("aria-labelledby", q.instruction == "" ? q.id + "_txt" : q.id + "_ins");
-    group.setAttribute("aria-errormessage", q.id + "_err");
-
-    //much more to do! 
-
-  }//-----------------------------------------------MULTI-----------------------
+  }//--------------------------------------------------------SINGLE+MULTI-------
 
 });//-----------------------------------EACH QUESTION ON PAGE-------------------
 
@@ -171,7 +161,8 @@ function KeyboardSupport(e, qid, callback) {
   if(a) {
 
     var role = a.getAttribute("role");
-    if( role && role == "radio" ) {
+
+    if( role && (role == "radio" || role == "checkbox") ) {  
 
       var group = a.parentNode;
       var children = group.children;
@@ -203,7 +194,8 @@ function KeyboardSupport(e, qid, callback) {
       //set question
       if(k == 32) {
         code = a.getAttribute("id").split("_")[1];
-        Confirmit.page.getQuestion(qid).setValue(code);
+        Confirmit.page.getQuestion(qid).setValue(code, "1"); 
+//just ofr multi, handle uncheck
         callback(); 
       }
     }
