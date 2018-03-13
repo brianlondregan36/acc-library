@@ -11,6 +11,7 @@ Confirmit.page.questions.forEach(function(q,i) {
 
   //SPECIFIC TO OPEN TEXT QUESTIONS---------------------------------------------
   if(q.type == "OpenText") {
+
     var input = document.getElementById(q.id + "_input");
     
     input.setAttribute("aria-labelledby", q.instruction == "" ? q.id + "_txt" : q.id + "_ins");
@@ -23,8 +24,8 @@ Confirmit.page.questions.forEach(function(q,i) {
     RunErrorHandling(input, errorArea)
   } //---------------------------------------------------------------OPEN-------
 
-  //SPECIFIC TO SINGLE QUESTIONS------------------------------------------------
-  if(q.type == "Single" || q.type == "Multi") {
+  //SPECIFIC TO SINGLE AND MULTI QUESTIONS--------------------------------------
+  else if( q.type == "Single" || q.type == "Multi" ) {
     
     var group = $(".cf-question#" + q.id + " .cf-list")[0];
     q.type == "Single" ? (role1 = "radiogroup", role2 = "radio") : (role1 = "group", role2 = "checkbox");
@@ -53,7 +54,7 @@ Confirmit.page.questions.forEach(function(q,i) {
 
     group.onclick = SetAriaChecked;
     group.onkeydown = function(e) {
-      KeyboardSupport(e, q.id, SetAriaChecked);
+      KeyboardSupport(e, q, SetAriaChecked);
     }; 
 
     function SetAriaChecked() {
@@ -66,16 +67,16 @@ Confirmit.page.questions.forEach(function(q,i) {
         }
       }
     }
-  }//--------------------------------------------------------SINGLE+MULTI-------
+  }//-----------------------------------------------------SINGLE-&-MULTI--------
 
-});//-----------------------------------EACH QUESTION ON PAGE-------------------
+});//---------------------------------EACH QUESTION ON PAGE---------------------
 
 
 
 
 function SetUpPage() {
   /*
-  *set up the page i.e. title, roles, progress bar and navigation buttons
+  * set up the page i.e. title, roles, progress bar and navigation buttons
   */
   document.title = Confirmit.page.questions[0].title;
 
@@ -103,16 +104,16 @@ function SetUpPage() {
 
 function AssignFormLabels(id, title) {
   /*
-  *label the form
+  * label the form
   */
   document.getElementById(id).setAttribute("role", "form");
   document.getElementById(id).setAttribute("aria-label", title);
 }
 
 
-function RunErrorHandling(formControl, itsErrorArea){
+function RunErrorHandling(formControl, itsErrorArea) {
   /*
-  *makes alerts and changing error messages accessible
+  * makes alerts and changing error messages accessible
   */
   var config = { attributes: true, subtree: true };
   var observer = new MutationObserver(function(mutations) {
@@ -128,40 +129,35 @@ function RunErrorHandling(formControl, itsErrorArea){
   });
   //listening to the question's error area
   observer.observe(itsErrorArea, config);
-}
 
-
-function ToggleAlert(x, y) {
-  /*
-  *needed for RunErrorHandling
-  */
-  var cl = x.classList.value;
-  if( cl.indexOf("--hidden") !== -1 ) {
-    //if element is hidden
-    if( x.hasAttribute("role") ) {
-      x.removeAttribute("role");
-      y.removeAttribute("aria-invalid");
+  function ToggleAlert(x, y) {
+    var cl = x.classList.value;
+    if( cl.indexOf("--hidden") !== -1 ) {
+      //if element is hidden
+      if( x.hasAttribute("role") ) {
+        x.removeAttribute("role");
+        y.removeAttribute("aria-invalid");
+      }
     }
-  }
-  else {
-    //if element is not hidden (error state)
-    if( !x.hasAttribute("role") ) {
-      x.setAttribute("role", "alert");
-      y.setAttribute("aria-invalid", "true");
+    else {
+      //if element is not hidden (error state)
+      if( !x.hasAttribute("role") ) {
+        x.setAttribute("role", "alert");
+        y.setAttribute("aria-invalid", "true");
+      }
     }
   }
 }
 
 
-function KeyboardSupport(e, qid, callback) {
+function KeyboardSupport(e, q, cbck) {
   /*
-  *handlers to use up, down and space bar to move around questions
+  * handler for up, down and space bar to move around question answers
   */
   var a = document.activeElement;
   if(a) {
 
     var role = a.getAttribute("role");
-
     if( role && (role == "radio" || role == "checkbox") ) {  
 
       var group = a.parentNode;
@@ -170,33 +166,41 @@ function KeyboardSupport(e, qid, callback) {
       var k = e.keyCode;
       if( k == 38 || k == 40 ) {
 
-        //scan through
         var curr; 
-        for(var i = 0; i < children.length; i++) {
-          if(a == children[i]) {
-            curr= i;
+        for(var i = 0; i < children.length; i++) {  //scan through
+          if( a == children[i] ) {
+            curr = i;
           }
         }
       
-        //move focus
-        if(k == 38) {
-          if(curr - 1 >= 0) {
+        if( k == 38 ) {  //move focus
+          if( curr - 1 >= 0 ) {
             children[curr - 1].focus();
           }
         }
-        if(k == 40) {
-          if(curr + 1 < children.length) {
+        if( k == 40 ) {
+          if( curr + 1 < children.length ) {
             children[curr + 1].focus();
           }
         }
       }
 
-      //set question
-      if(k == 32) {
+      if( k == 32 ) {  //set answer
+        
         code = a.getAttribute("id").split("_")[1];
-        Confirmit.page.getQuestion(qid).setValue(code, "1"); 
-//just ofr multi, handle uncheck
-        callback(); 
+        
+        if( role == "radio" ) {
+          q.setValue(code); 
+        }
+        else if( role == "checkbox" ) {
+          if( q.values.indexOf(code) != -1 ) {
+            q.setValue(code, "0");             
+          }
+          else {
+            q.setValue(code, "1"); 
+          }
+        }
+        cbck(); 
       }
     }
   }
