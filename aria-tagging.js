@@ -57,7 +57,7 @@ var acclib = (function AccModule() {
 	  if(a.isOther) {
 	    var other = document.getElementById(a.otherFieldName);
 	    other.setAttribute("aria-label", a.text);
-	    other.onkeydown = SetAriaChecked;
+	    other.onkeyup = SetAriaChecked;
 	  }
 	});
 
