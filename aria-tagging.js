@@ -53,6 +53,14 @@ var acclib = (function AccModule() {
         } 
         SetAriaChecked(); 
 
+	q.answers.forEach(function(a) {
+	  if(a.isOther) {
+	    var other = document.getElementById(a.otherFieldName);
+	    other.setAttribute("aria-label", a.text);
+	    other.onkeydown = SetAriaChecked;
+	  }
+	});
+
         var errorArea = document.getElementById(q.id + "_err");
         RunErrorHandling(group, errorArea)
 
