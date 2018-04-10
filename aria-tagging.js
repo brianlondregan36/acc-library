@@ -200,26 +200,32 @@ var acclib = (function AccModule() {
       input.removeAttribute("aria-errormessage")
     }
 
-    qResult.answerValidationResults.forEach(function(aResult) {  
-      aResult.errors.forEach(function(err) {
-        if(err.type == "OtherRequired") {
-          if(others.length > 0) {
+    if(qResult.answerValidationResults.length > 0) {
+      qResult.answerValidationResults.forEach(function(aResult) {  
+        aResult.errors.forEach(function(err) {
+          if(err.type == "OtherRequired" && others) {
 	    var matchThis = qResult.questionId + "_" + aResult.answerCode + "_other";
 
 	    for(var i = 0; i < others.length; i++) {
 	      if( others[i].id == matchThis ) {
-		errorArea = others[i].nextElementSibling;
-		errorArea.setAttribute("id", matchThis + "_err");
+                errorArea = others[i].nextElementSibling;
+                errorArea.setAttribute("id", matchThis + "_err");
 
-		errorArea.setAttribute("role", "alert");
-		others[i].setAttribute("aria-invalid", "true");
-	        others[i].setAttribute("aria-errormessage", matchThis + "_err");
+                errorArea.setAttribute("role", "alert");
+                others[i].setAttribute("aria-invalid", "true");
+                others[i].setAttribute("aria-errormessage", matchThis + "_err");
 	      }
             }
           }
-        }
+        });
       });
-    });
+    }
+    else if(qResult.answerValidationResults.length == 0 && others) {
+      for(var i = 0; i < others.length; i++) {
+        others[i].removeAttribute("aria-invalid");
+        others[i].removeAttribute("aria-errormessage");
+      }
+    }
   }
 
   function KeyboardSupport(e, q, cbck) {
