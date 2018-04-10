@@ -9,7 +9,6 @@ var acclib = (function AccModule() {
 
       $("div#" + q.id + " div.cf-question__text").attr("id", q.id + "_txt");
       $("div#" + q.id + " div.cf-question__instruction").attr("id", q.id + "_ins");
-      $("div#" + q.id + " div.cf-question__error").attr("id", q.id + "_err");
 
       AssignFormLabels(q.id, q.title);
 
@@ -23,9 +22,10 @@ var acclib = (function AccModule() {
         if(q.required) {
           input.setAttribute("aria-required", "true");
         }
-
-        var errorArea = document.getElementById(q.id + "_err");
-        RunErrorHandling(input, errorArea)
+	
+	q.validationCompleteEvent.on(function(validationResult) {
+	  ErrorLabels(null, input, validationResult);
+	});
       } //---------------------------------------------------------------OPEN-------
 
       //SPECIFIC TO SINGLE AND MULTI QUESTIONS--------------------------------------
@@ -60,10 +60,7 @@ var acclib = (function AccModule() {
 	    other.onkeyup = SetAriaChecked;
 	  }
 	});
-
-        var errorArea = document.getElementById(q.id + "_err");
-        RunErrorHandling(group, errorArea)
-
+	
         group.onclick = SetAriaChecked;
         group.onkeydown = function(e) {
           KeyboardSupport(e, q, SetAriaChecked);
@@ -79,6 +76,10 @@ var acclib = (function AccModule() {
             }
           }
         }
+
+	q.validationCompleteEvent.on(function(validationResult) {
+	  ErrorLabels(group, null, validationResult);  //inputs (2nd param) should eventually be an array of input (or others)
+	});
       }//-----------------------------------------------------SINGLE-&-MULTI--------
 
     });//---------------------------------EACH QUESTION-----------------------------
@@ -113,6 +114,7 @@ var acclib = (function AccModule() {
     }
 
     CheckAltTags();
+    ToastAlert();
   }
 
 
@@ -133,6 +135,37 @@ var acclib = (function AccModule() {
     }
   }
 
+  function ToastAlert() {
+    /*
+    * setting and unsetting the alert role for the "toast" modal window error popup
+    */
+    var toast = document.getElementsByClassName("cf-toast")[0];
+    var config = { attributes: true, subtree: true };
+    var observer = new MutationObserver(function(mutations) {
+      mutations.forEach(function(mutation) {
+        if(mutation.attributeName == "class") {
+          ToggleAlert();
+        }
+      });
+    });
+    //listening to the page's toast area
+    observer.observe(toast, config);
+
+    function ToggleAlert() {
+      var cl = toast.classList.value;
+      if( cl.indexOf("--hidden") !== -1 ) {
+        if( toast.hasAttribute("role") ) {  //if element is hidden
+          toast.removeAttribute("role");
+        }
+      }
+      else {
+        if( !toast.hasAttribute("role") ) {  //if element is not hidden (error state)
+          toast.setAttribute("role", "alert");
+        }
+      }
+    }
+  }
+
   function AssignFormLabels(id, title) {
     /*
     * label the form
@@ -140,43 +173,18 @@ var acclib = (function AccModule() {
     document.getElementById(id).setAttribute("role", "form");
     document.getElementById(id).setAttribute("aria-label", title);
   }
-
-  function RunErrorHandling(formControl, itsErrorArea) {
+  
+  function ErrorLabels(group, inputs, result) {
     /*
-    * makes alerts and changing error messages accessible
+    * adding and removing all error related aria tags to the question
     */
-    var config = { attributes: true, subtree: true };
-    var observer = new MutationObserver(function(mutations) {
-      mutations.forEach(function(mutation) {
-        if(mutation.attributeName == "class") {
-          //set and unset alert roles on error areas and invalid attribute on the form input
-          var mutationNode = mutation.target;
-          var toast = document.getElementsByClassName("cf-toast")[0]
-          ToggleAlert(mutationNode, formControl);
-          ToggleAlert(toast, formControl);
-        }
-      });
-    });
-    //listening to the question's error area
-    observer.observe(itsErrorArea, config);
 
-    function ToggleAlert(x, y) {
-      var cl = x.classList.value;
-      if( cl.indexOf("--hidden") !== -1 ) {
-        //if element is hidden
-        if( x.hasAttribute("role") ) {
-          x.removeAttribute("role");
-          y.removeAttribute("aria-invalid");
-        }
-      }
-      else {
-        //if element is not hidden (error state)
-        if( !x.hasAttribute("role") ) {
-          x.setAttribute("role", "alert");
-          y.setAttribute("aria-invalid", "true");
-        }
+    if(result.errors.length > 0) {
+      if(inputs) {
+        inputs.setAttribute("aria-invalid", "true");
       }
     }
+
   }
 
   function KeyboardSupport(e, q, cbck) {
