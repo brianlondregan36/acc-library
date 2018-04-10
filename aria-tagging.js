@@ -9,6 +9,7 @@ var acclib = (function AccModule() {
 
       $("div#" + q.id + " div.cf-question__text").attr("id", q.id + "_txt");
       $("div#" + q.id + " div.cf-question__instruction").attr("id", q.id + "_ins");
+      $("div#" + q.id + " div.cf-question__error").attr("id", q.id + "_err");
 
       AssignFormLabels(q.id, q.title);
 
@@ -23,8 +24,9 @@ var acclib = (function AccModule() {
           input.setAttribute("aria-required", "true");
         }
 	
-	q.validationCompleteEvent.on(function(validationResult) {
-	  ErrorLabels(null, input, validationResult);
+
+	q.validationEvent.on(function(qResult) {
+	  ErrorLabels(input, null, qResult);
 	});
       } //---------------------------------------------------------------OPEN-------
 
@@ -53,9 +55,11 @@ var acclib = (function AccModule() {
         } 
         SetAriaChecked(); 
 
+	var others = [];
 	q.answers.forEach(function(a) {
 	  if(a.isOther) {
 	    var other = document.getElementById(a.otherFieldName);
+	    others.push(other);
 	    other.setAttribute("aria-label", a.text);
 	    other.onkeyup = SetAriaChecked;
 	  }
@@ -77,8 +81,8 @@ var acclib = (function AccModule() {
           }
         }
 
-	q.validationCompleteEvent.on(function(validationResult) {
-	  ErrorLabels(group, null, validationResult);  //inputs (2nd param) should eventually be an array of input (or others)
+	q.validationCompleteEvent.on(function(qResult) {
+	  ErrorLabels(group, others, qResult);  
 	});
       }//-----------------------------------------------------SINGLE-&-MULTI--------
 
@@ -174,17 +178,26 @@ var acclib = (function AccModule() {
     document.getElementById(id).setAttribute("aria-label", title);
   }
   
-  function ErrorLabels(group, inputs, result) {
+  function ErrorLabels(input, others, qResult) {
     /*
     * adding and removing all error related aria tags to the question
     */
 
-    if(result.errors.length > 0) {
-      if(inputs) {
-        inputs.setAttribute("aria-invalid", "true");
-      }
-    }
+    var errorArea = document.getElementById(qResult.questionId + "_err");
 
+    qResult.errors.forEach(function(err) {
+      errorArea.setAttribute("role", "alert");
+      input.setAttribute("aria-invalid", "true");
+      input.setAttribute("aria-errormessage", qResult.questionId + "_err");
+      console.log("in qResults errors: " + err.type);
+    });
+    qResult.answerValidationResults.forEach(function(aResult) {  
+      aResult.errors.forEach(function(err) {
+        console.log("in qResults answers' errors: " + err.type);
+      });
+    });
+
+    //OtherRequired, MultiCount, Required
   }
 
   function KeyboardSupport(e, q, cbck) {
