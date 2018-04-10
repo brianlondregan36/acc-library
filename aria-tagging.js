@@ -180,24 +180,46 @@ var acclib = (function AccModule() {
   
   function ErrorLabels(input, others, qResult) {
     /*
-    * adding and removing all error related aria tags to the question
+    * adding and removing all error message related aria tags to the question
+    * this function does not touch the toast message
+    * possible types are OtherRequired, MultiCount, Required
     */
 
     var errorArea = document.getElementById(qResult.questionId + "_err");
 
-    qResult.errors.forEach(function(err) {
-      errorArea.setAttribute("role", "alert");
-      input.setAttribute("aria-invalid", "true");
-      input.setAttribute("aria-errormessage", qResult.questionId + "_err");
-      console.log("in qResults errors: " + err.type);
-    });
+    if(qResult.errors.length > 0) {
+      qResult.errors.forEach(function(err) {
+        errorArea.setAttribute("role", "alert");
+        input.setAttribute("aria-invalid", "true");
+        input.setAttribute("aria-errormessage", qResult.questionId + "_err");
+      });
+    }
+    else if(errorArea.firstElementChild.children.length == 0) {
+      errorArea.removeAttribute("role");
+      input.removeAttribute("aria-invalid");
+      input.removeAttribute("aria-errormessage")
+    }
+
     qResult.answerValidationResults.forEach(function(aResult) {  
       aResult.errors.forEach(function(err) {
-        console.log("in qResults answers' errors: " + err.type);
+        if(err.type == "OtherRequired") {
+          if(others.length > 0) {
+	    var matchThis = qResult.questionId + "_" + aResult.answerCode + "_other";
+
+	    for(var i = 0; i < others.length; i++) {
+	      if( others[i].id == matchThis ) {
+		errorArea = others[i].nextElementSibling;
+		errorArea.setAttribute("id", matchThis + "_err");
+
+		errorArea.setAttribute("role", "alert");
+		others[i].setAttribute("aria-invalid", "true");
+	        others[i].setAttribute("aria-errormessage", matchThis + "_err");
+	      }
+            }
+          }
+        }
       });
     });
-
-    //OtherRequired, MultiCount, Required
   }
 
   function KeyboardSupport(e, q, cbck) {
