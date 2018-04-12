@@ -2,14 +2,16 @@ var acclib = (function AccModule() {
 
 
 
+
   function SetUpQuestions() {
 
     //FOR EACH QUESTION ON PAGE
     Confirmit.page.questions.forEach(function(q,i) {
 
-      $("div#" + q.id + " div.cf-question__text").attr("id", q.id + "_txt");
-      $("div#" + q.id + " div.cf-question__instruction").attr("id", q.id + "_ins");
-      $("div#" + q.id + " div.cf-question__error").attr("id", q.id + "_err");
+      var thisQElem = document.getElementById(q.id);
+      thisQElem.getElementsByClassName("cf-question__text")[0].setAttribute("id", q.id + "_txt");
+      thisQElem.getElementsByClassName("cf-question__instruction")[0].setAttribute("id", q.id + "_ins");
+      thisQElem.getElementsByClassName("cf-question__error")[0].setAttribute("id"), q.id + "_err");
 
       AssignFormLabels(q.id, q.title);
 
@@ -33,7 +35,7 @@ var acclib = (function AccModule() {
       //SPECIFIC TO SINGLE AND MULTI QUESTIONS--------------------------------------
       else if( q.type == "Single" || q.type == "Multi" ) {
     
-        var group = $(".cf-question#" + q.id + " .cf-list")[0];
+        var group = thisQElem.getElementsByClassName("cf-list")[0];
         q.type == "Single" ? (role1 = "radiogroup", role2 = "radio") : (role1 = "group", role2 = "checkbox");
     
         group.setAttribute("role", role1);
@@ -56,7 +58,7 @@ var acclib = (function AccModule() {
         SetAriaChecked(); 
 
 	var others = [];
-	q.answers.forEach(function(a) {
+	Array.prototype.forEach.call(q.answers, function(a) {
 	  if(a.isOther) {
 	    var other = document.getElementById(a.otherFieldName);
 	    others.push(other);
@@ -86,8 +88,54 @@ var acclib = (function AccModule() {
 	});
       }//-----------------------------------------------------SINGLE-&-MULTI--------
 
+      //SPECIFIC TO GRID AND MULTI GRID QUESTIONS-----------------------------------
+      else if( q.type == "Grid" || "Grid3d" ) {
+         
+        var group = thisQElem.getElementsByClassName("cf-grid")[0];
+	q.type == "Grid" ? (role1 = "radiogroup", role2 = "radio") : (role1 = "group", role2 = "checkbox");
+
+        group.setAttribute("aria-labelledby", q.instruction == "" ? q.id + "_txt" : q.id + "_ins");
+        group.setAttribute("aria-errormessage", q.id + "_err");
+        if(q.required) {
+          group.setAttribute("aria-required", "true");
+        }
+
+	var scaleLabels = []; 
+	Array.prototype.forEach.call(thisQElem.getElementsByClassName("cf-grid-answer__label"), function(label, index) {
+          var id = q.id + "scaleLabel" + index + 1;
+	  scaleLabels.push(id);
+	});
+	Array.prototype.forEach.call(thisQElem.getElementsByClassName("cf-grid-answer__text"), function(label, index) {
+          if( index != 0 ) {
+	    var thisRow = label.parentElement.parentElement; 
+	    thisRow.setAttribute("role", role1);
+            thisRow.setAttribute("aria-labelledby", label.id);
+	  }
+        });
+	var inputs = []
+	Array.prototype.forEach.call(thisQElem.getElementsByClassName("cf-grid-answer__scale-item"), function(input, index) {
+          if( input.hasAttribute("id") ) {
+            inputs.push(input);
+          }
+        });
+
+	inputs.forEach(input, index) {
+	//set tab index and role (use modulo to get the right one)
+	  if(index %= 0) {
+	    input.setAttribute("tabindex", "0"
+	  }
+	// SetAriaChecked (for load and click) on inputs not group (maybe reuse function from Single/Multi and move it down below?)
+	// Run "other" check code
+	// KeyboardSupport function
+	// ErrorLabels function
+	}
+
+
+      }//-----------------------------GRID-&-MULTIGRID------------------------------
+
     });//---------------------------------EACH QUESTION-----------------------------
   }
+
 
 
 
@@ -120,6 +168,7 @@ var acclib = (function AccModule() {
     CheckAltTags();
     ToastAlert();
   }
+
 
 
 
