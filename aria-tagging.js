@@ -11,7 +11,7 @@ var acclib = (function AccModule() {
       var thisQElem = document.getElementById(q.id);
       thisQElem.getElementsByClassName("cf-question__text")[0].setAttribute("id", q.id + "_txt");
       thisQElem.getElementsByClassName("cf-question__instruction")[0].setAttribute("id", q.id + "_ins");
-      thisQElem.getElementsByClassName("cf-question__error")[0].setAttribute("id"), q.id + "_err");
+      thisQElem.getElementsByClassName("cf-question__error")[0].setAttribute("id", q.id + "_err");
 
       AssignFormLabels(q.id, q.title);
 
@@ -30,7 +30,7 @@ var acclib = (function AccModule() {
 	q.validationEvent.on(function(qResult) {
 	  ErrorLabels(input, null, qResult);
 	});
-      } //---------------------------------------------------------------OPEN-------
+      } //-----------------------------------------------------------END-OPEN-------
 
       //SPECIFIC TO SINGLE AND MULTI QUESTIONS--------------------------------------
       else if( q.type == "Single" || q.type == "Multi" ) {
@@ -55,7 +55,7 @@ var acclib = (function AccModule() {
             inputs[i].setAttribute("tabindex", "-1");
           }
         } 
-        SetAriaChecked(); 
+        SetAriaChecked(inputs); 
 
 	var others = [];
 	Array.prototype.forEach.call(q.answers, function(a) {
@@ -63,33 +63,25 @@ var acclib = (function AccModule() {
 	    var other = document.getElementById(a.otherFieldName);
 	    others.push(other);
 	    other.setAttribute("aria-label", a.text);
-	    other.onkeyup = SetAriaChecked;
+	    other.onkeyup = function() {
+              SetAriaChecked(inputs);
+            };
 	  }
 	});
 	
-        group.onclick = SetAriaChecked;
+        group.onclick = function() {
+          SetAriaChecked(inputs);
+        };
         group.onkeydown = function(e) {
-          KeyboardSupport(e, q, SetAriaChecked);
+          KeyboardSupport(e, q, inputs, SetAriaChecked);
         }; 
-
-        function SetAriaChecked() {
-          for(var i = 0; i < inputs.length; i++) {
-            if( inputs[i].className.indexOf("--selected") != -1 ) {      
-              inputs[i].setAttribute("aria-checked", "true"); 
-            }
-            else {
-              inputs[i].setAttribute("aria-checked", "false");
-            }
-          }
-        }
-
 	q.validationCompleteEvent.on(function(qResult) {
 	  ErrorLabels(group, others, qResult);  
 	});
-      }//-----------------------------------------------------SINGLE-&-MULTI--------
+      }//-------------------------------------------------END-SINGLE-MULTI----------
 
       //SPECIFIC TO GRID AND MULTI GRID QUESTIONS-----------------------------------
-      else if( q.type == "Grid" || "Grid3d" ) {
+      else if( q.type == "Grid" || qtype == "Grid3d" ) {
          
         var group = thisQElem.getElementsByClassName("cf-grid")[0];
 	q.type == "Grid" ? (role1 = "radiogroup", role2 = "radio") : (role1 = "group", role2 = "checkbox");
@@ -100,9 +92,10 @@ var acclib = (function AccModule() {
           group.setAttribute("aria-required", "true");
         }
 
-	var scaleLabels = []; 
+	var scaleLabels = [], inputs = []; 
 	Array.prototype.forEach.call(thisQElem.getElementsByClassName("cf-grid-answer__label"), function(label, index) {
-          var id = q.id + "scaleLabel" + index + 1;
+          var id = q.id + "scaleLabel" + (index + 1);
+          label.setAttribute("id", id);
 	  scaleLabels.push(id);
 	});
 	Array.prototype.forEach.call(thisQElem.getElementsByClassName("cf-grid-answer__text"), function(label, index) {
@@ -112,37 +105,176 @@ var acclib = (function AccModule() {
             thisRow.setAttribute("aria-labelledby", label.id);
 	  }
         });
-	var inputs = []
 	Array.prototype.forEach.call(thisQElem.getElementsByClassName("cf-grid-answer__scale-item"), function(input, index) {
           if( input.hasAttribute("id") ) {
             inputs.push(input);
           }
         });
 
-	inputs.forEach(input, index) {
-	//set tab index and role (use modulo to get the right one)
-	  if(index %= 0) {
-	    input.setAttribute("tabindex", "0"
+	var ptr = 0;
+	inputs.forEach(function(input, index) {
+          input.setAttribute("role", role2);
+          input.setAttribute("aria-labelledby", scaleLabels[ptr]);
+	  if( ptr == 0 ) {
+	    input.setAttribute("tabindex", "0");
 	  }
-	// SetAriaChecked (for load and click) on inputs not group (maybe reuse function from Single/Multi and move it down below?)
-	// Run "other" check code
-	// KeyboardSupport function
-	// ErrorLabels function
-	}
+	  else {
+	    input.setAttribute("tabindex", "-1");
+	  }
+
+          (index + 1) % scaleLabels.length == 0 ? ptr = 0 : ptr++;
+        });
+	
+        SetAriaChecked(inputs);
+        group.onclick = function()
+          SetAriaChecked(inputs);
+        };
+        group.onkeydown = function(e) {
+          KeyboardSupport(e, q, inputs, SetAriaChecked);
+        };
+
+	// run "other" check code
+	// test and call KeyboardSupport function
+	// test and call ErrorLabels function
+      }//----------------------------------------------END-GRID-MULTIGRID-----------
+
+    });//---------------------------------------------------END-EACH-QUESTION-------
 
 
-      }//-----------------------------GRID-&-MULTIGRID------------------------------
 
-    });//---------------------------------EACH QUESTION-----------------------------
-  }
+    function AssignFormLabels(id, title) {
+      /*
+      * label the form
+      */
+      document.getElementById(id).setAttribute("role", "form");
+      document.getElementById(id).setAttribute("aria-label", title);
+    }
+
+    function SetAriaChecked(inputs) {
+      /*
+      * go through inputs and see what's checked and unchecked and set aria accordingly
+      */
+      for(var i = 0; i < inputs.length; i++) {
+        if( inputs[i].className.indexOf("--selected") != -1 ) {
+          inputs[i].setAttribute("aria-checked", "true");
+        }
+        else {
+          inputs[i].setAttribute("aria-checked", "false");
+        }
+      }
+    }
+
+    function ErrorLabels(input, others, qResult) {
+      /*
+      * adding and removing all error message related aria tags to the question
+      * this function does not touch the toast message
+      * possible types are OtherRequired, MultiCount, Required
+      */
+      var errorArea = document.getElementById(qResult.questionId + "_err");
+
+      if(qResult.errors.length > 0) {
+        qResult.errors.forEach(function(err) {
+          errorArea.setAttribute("role", "alert");
+          input.setAttribute("aria-invalid", "true");
+          input.setAttribute("aria-errormessage", qResult.questionId + "_err");
+        });
+      }
+      else if(errorArea.firstElementChild.children.length == 0) {
+        errorArea.removeAttribute("role");
+        input.removeAttribute("aria-invalid");
+        input.removeAttribute("aria-errormessage")
+      }
+
+      if(qResult.answerValidationResults.length > 0) {
+        qResult.answerValidationResults.forEach(function(aResult) {
+          aResult.errors.forEach(function(err) {
+            if(err.type == "OtherRequired" && others) {
+              var matchThis = qResult.questionId + "_" + aResult.answerCode + "_other";
+
+              for(var i = 0; i < others.length; i++) {
+                if( others[i].id == matchThis ) {
+                  errorArea = others[i].nextElementSibling;
+                  errorArea.setAttribute("id", matchThis + "_err");
+
+                  errorArea.setAttribute("role", "alert");
+                  others[i].setAttribute("aria-invalid", "true");
+                  others[i].setAttribute("aria-errormessage", matchThis + "_err");
+                }
+              }
+            }
+          });
+        });
+      }
+      else if(qResult.answerValidationResults.length == 0 && others) {
+        for(var i = 0; i < others.length; i++) {
+          others[i].removeAttribute("aria-invalid");
+          others[i].removeAttribute("aria-errormessage");
+        }
+      }
+    }
+
+    function KeyboardSupport(e, q, i, cbck) {
+      /*
+      * handler for up, down and space bar to move around question answers
+      */
+      var a = document.activeElement;
+      if(a) {
+
+        var role = a.getAttribute("role");
+        if( role && (role == "radio" || role == "checkbox") ) {
+
+          var group = a.parentNode;
+          var children = group.children;
+
+          var k = e.keyCode;
+          if( k == 38 || k == 40 ) {
+
+            var curr;
+            for(var i = 0; i < children.length; i++) {  //scan through
+              if( a == children[i] ) {
+                curr = i;
+              }
+            }
+
+            if( k == 38 ) {  //move focus
+              if( curr - 1 >= 0 ) {
+                children[curr - 1].focus();
+              }
+            }
+            if( k == 40 ) {
+              if( curr + 1 < children.length ) {
+                children[curr + 1].focus();
+              }
+            }
+          }
+
+          if( k == 32 ) {  //set answer
+
+            code = a.getAttribute("id").split("_")[1];
+
+            if( role == "radio" ) {
+              q.setValue(code);
+            }
+            else if( role == "checkbox" ) {
+              if( q.values.indexOf(code) > -1 ) {
+                q.setValue(code);
+              }
+              else {
+                q.setValue(code, "1");
+              }
+            }
+            cbck(i);
+          }
+        }
+      }
+    }
+  }//--------------------------------------------------END-QUESTION-FUNCTION--------
 
 
 
 
   function SetUpPage() {
-    /*
-    * set up the page i.e. title, roles, progress bar and navigation buttons
-    */
+ 
     document.title = Confirmit.page.questions[0].title;
 
     document.getElementsByClassName("cf-page__hidden-fields")[0].setAttribute("aria-hidden", "true");
@@ -167,172 +299,58 @@ var acclib = (function AccModule() {
 
     CheckAltTags();
     ToastAlert();
-  }
 
 
 
-
-  function CheckAltTags() {
-    /*
-    * alert designer if they've added images without alt attribute
-    */
-    var elems = document.getElementsByTagName('img'); 
-    for(var i = 0; i < elems.length; i++) {
-      var a = elems[i].getAttribute('alt');
-      if( !a || a == "") {
-        console.log(elems[i].outerHTML + " is missing an Alt attribute"); 
-      }
-      else if( a.toString().length > 125 ) {
-        console.log(elems[i].outerHTML + " needs a shorter Alt attribute"); 
-      }
-    }
-  }
-
-  function ToastAlert() {
-    /*
-    * setting and unsetting the alert role for the "toast" modal window error popup
-    */
-    var toast = document.getElementsByClassName("cf-toast")[0];
-    var config = { attributes: true, subtree: true };
-    var observer = new MutationObserver(function(mutations) {
-      mutations.forEach(function(mutation) {
-        if(mutation.attributeName == "class") {
-          ToggleAlert();
+    function CheckAltTags() {
+      /*
+      * alert designer if they've added images without alt attribute
+      */
+      var elems = document.getElementsByTagName('img');
+      for(var i = 0; i < elems.length; i++) {
+        var a = elems[i].getAttribute('alt');
+        if( !a || a == "") {
+          console.log(elems[i].outerHTML + " is missing an Alt attribute");
         }
-      });
-    });
-    //listening to the page's toast area
-    observer.observe(toast, config);
-
-    function ToggleAlert() {
-      var cl = toast.classList.value;
-      if( cl.indexOf("--hidden") !== -1 ) {
-        if( toast.hasAttribute("role") ) {  //if element is hidden
-          toast.removeAttribute("role");
-        }
-      }
-      else {
-        if( !toast.hasAttribute("role") ) {  //if element is not hidden (error state)
-          toast.setAttribute("role", "alert");
+        else if( a.toString().length > 125 ) {
+          console.log(elems[i].outerHTML + " needs a shorter Alt attribute");
         }
       }
     }
-  }
 
-  function AssignFormLabels(id, title) {
-    /*
-    * label the form
-    */
-    document.getElementById(id).setAttribute("role", "form");
-    document.getElementById(id).setAttribute("aria-label", title);
-  }
-  
-  function ErrorLabels(input, others, qResult) {
-    /*
-    * adding and removing all error message related aria tags to the question
-    * this function does not touch the toast message
-    * possible types are OtherRequired, MultiCount, Required
-    */
-
-    var errorArea = document.getElementById(qResult.questionId + "_err");
-
-    if(qResult.errors.length > 0) {
-      qResult.errors.forEach(function(err) {
-        errorArea.setAttribute("role", "alert");
-        input.setAttribute("aria-invalid", "true");
-        input.setAttribute("aria-errormessage", qResult.questionId + "_err");
-      });
-    }
-    else if(errorArea.firstElementChild.children.length == 0) {
-      errorArea.removeAttribute("role");
-      input.removeAttribute("aria-invalid");
-      input.removeAttribute("aria-errormessage")
-    }
-
-    if(qResult.answerValidationResults.length > 0) {
-      qResult.answerValidationResults.forEach(function(aResult) {  
-        aResult.errors.forEach(function(err) {
-          if(err.type == "OtherRequired" && others) {
-	    var matchThis = qResult.questionId + "_" + aResult.answerCode + "_other";
-
-	    for(var i = 0; i < others.length; i++) {
-	      if( others[i].id == matchThis ) {
-                errorArea = others[i].nextElementSibling;
-                errorArea.setAttribute("id", matchThis + "_err");
-
-                errorArea.setAttribute("role", "alert");
-                others[i].setAttribute("aria-invalid", "true");
-                others[i].setAttribute("aria-errormessage", matchThis + "_err");
-	      }
-            }
+    function ToastAlert() {
+      /*
+      * setting and unsetting the alert role for the "toast" modal window error popup
+      */
+      var toast = document.getElementsByClassName("cf-toast")[0];
+      var config = { attributes: true, subtree: true };
+      var observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+          if(mutation.attributeName == "class") {
+            ToggleAlert();
           }
         });
       });
-    }
-    else if(qResult.answerValidationResults.length == 0 && others) {
-      for(var i = 0; i < others.length; i++) {
-        others[i].removeAttribute("aria-invalid");
-        others[i].removeAttribute("aria-errormessage");
-      }
-    }
-  }
+      //listening to the page's toast area
+      observer.observe(toast, config);
 
-  function KeyboardSupport(e, q, cbck) {
-    /*
-    * handler for up, down and space bar to move around question answers
-    */
-    var a = document.activeElement;
-    if(a) {
-
-      var role = a.getAttribute("role");
-      if( role && (role == "radio" || role == "checkbox") ) {  
-
-        var group = a.parentNode;
-        var children = group.children;
-
-        var k = e.keyCode;
-        if( k == 38 || k == 40 ) {
-
-          var curr; 
-          for(var i = 0; i < children.length; i++) {  //scan through
-            if( a == children[i] ) {
-              curr = i;
-            }
-          }
-      
-          if( k == 38 ) {  //move focus
-            if( curr - 1 >= 0 ) {
-              children[curr - 1].focus();
-            }
-          }
-          if( k == 40 ) {
-            if( curr + 1 < children.length ) {
-              children[curr + 1].focus();
-            }
+      function ToggleAlert() {
+        var cl = toast.classList.value;
+        if( cl.indexOf("--hidden") !== -1 ) {
+          if( toast.hasAttribute("role") ) {  //if element is hidden
+            toast.removeAttribute("role");
           }
         }
-
-        if( k == 32 ) {  //set answer
-        
-          code = a.getAttribute("id").split("_")[1];
-        
-          if( role == "radio" ) {
-            q.setValue(code); 
+        else {
+          if( !toast.hasAttribute("role") ) {  //if element is not hidden (error state)
+            toast.setAttribute("role", "alert");
           }
-          else if( role == "checkbox" ) {
-            if( q.values.indexOf(code) > -1 ) {
-              q.setValue(code);             
-            }
-            else {
-              q.setValue(code, "1"); 
-            }
-          }
-          cbck(); 
         }
       }
     }
-  }
+  }//---------------------------------------------------END-PAGE-FUNCTION-----------
 
+  
 
 
   return {
