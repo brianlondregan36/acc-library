@@ -251,13 +251,13 @@ var acclib = (function AccModule() {
           if( k == 32 ) {  //set answer
 
             code = a.getAttribute("id").split("_")[1];
-
+		
             if( role == "radio" ) {
-              q.setValue(code);
-            }
+              q.setValue(code); //must change this for grids!
+            } 
             else if( role == "checkbox" ) {
               if( q.values.indexOf(code) > -1 ) {
-                q.setValue(code);
+                q.setValue(code); 
               }
               else {
                 q.setValue(code, "1");
