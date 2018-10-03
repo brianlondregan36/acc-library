@@ -277,6 +277,11 @@ var acclib = (function AccModule() {
  
     document.title = Confirmit.page.questions[0].title;
 
+    var rndm = Math.floor(Math.random() * 10000);
+    var action = document.getElementById("page_form").getAttribute("action");
+    action = action + "?acc=" + rndm; 
+    document.getElementById("page_form").setAttribute("action", action);
+
     document.getElementsByClassName("cf-page__hidden-fields")[0].setAttribute("aria-hidden", "true");
     document.getElementsByClassName("cf-page__header")[0].setAttribute("role", "banner");
     document.getElementsByClassName("cf-page__main")[0].setAttribute("role", "main");
