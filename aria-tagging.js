@@ -81,7 +81,7 @@ var acclib = (function AccModule() {
       }//-------------------------------------------------END-SINGLE-MULTI----------
 
       //SPECIFIC TO GRID AND MULTI GRID QUESTIONS-----------------------------------
-      else if( q.type == "Grid" || qtype == "Grid3d" ) {
+      else if( q.type == "Grid" || q.type == "Grid3d" ) {
          
         var group = thisQElem.getElementsByClassName("cf-grid")[0];
 	q.type == "Grid" ? (role1 = "radiogroup", role2 = "radio") : (role1 = "group", role2 = "checkbox");
