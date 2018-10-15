@@ -126,7 +126,7 @@ var acclib = (function AccModule() {
         });
 	
         SetAriaChecked(inputs);
-        group.onclick = function()
+        group.onclick = function() {
           SetAriaChecked(inputs);
         };
         group.onkeydown = function(e) {
