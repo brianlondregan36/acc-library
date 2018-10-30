@@ -275,22 +275,27 @@ var acclib = (function AccModule() {
 
   function SetUpPage() {
  
-    //better page title
+    //unique page title is better
     document.title = Confirmit.page.questions[0].title;
 
-    //unique query string
+    //unique query string to convince readers its a new page
     var rndm = Math.floor(Math.random() * 10000);
     var action = Confirmit._pageView._pageForm[0].action
     var action = document.getElementById("page_form").getAttribute("action");
     action = action + "?acc=" + rndm; 
     document.getElementById("page_form").setAttribute("action", action);
 
-    //layout roles
+    //assigning layout roles
     document.getElementsByClassName("cf-page__hidden-fields")[0].setAttribute("aria-hidden", "true");
     document.getElementsByClassName("cf-page__header")[0].setAttribute("role", "banner");
     document.getElementsByClassName("cf-page__main")[0].setAttribute("role", "main");
+    Array.prototype.forEach.call(document.getElementsByClassName("cf-question__title"), function(title){
+        title.setAttribute("role", "heading");
+        title.setAttribute("aria-level", "1");
+    });
+    document.getElementsByClassName("cf-page__navigation")[0].setAttribute("role", "navigation");
 
-    //progress bar 
+    //progress bar text indication 
     var progBar = document.getElementsByClassName("cf-progress__indicator");
     if(progBar[0]) {
       var accProgress = document.createElement("div");
@@ -300,15 +305,16 @@ var acclib = (function AccModule() {
       progBar[0].parentNode.parentNode.appendChild(accProgress);
     }
 
-    //navigation buttons
-    document.getElementsByClassName("cf-page__navigation")[0].setAttribute("role", "navigation");
+    //fixing navigation buttons - tabindex should be 0
     var navButtons = document.getElementsByClassName("cf-navigation__button");
     for(var i = 0; i < navButtons.length; i++) {
       navButtons[i].setAttribute("tabindex", "0");
     }
 
-    //outline to show focus    
-    var css='div[tabindex^="0"]:focus, div[tabindex^="-1"]:focus, input:focus, textarea:focus, button:focus{outline:2px solid #42bdd1;outline-offset:1px;}';
+    //styling stuff: outline to show focus, question titles to look like headings    
+    var css = 'div[tabindex^="0"]:focus, div[tabindex^="-1"]:focus, input:focus, textarea:focus, button:focus { ' + 
+          'outline:2px solid #42bdd1;outline-offset:1px; }' + 
+          '.cf-question__title { font-size:1.3em;font-weight:bold; }';
     head = document.head || document.getElementsByTagName('head')[0],
     style=document.createElement('style');
     style.type = 'text/css';
