@@ -275,17 +275,22 @@ var acclib = (function AccModule() {
 
   function SetUpPage() {
  
+    //better page title
     document.title = Confirmit.page.questions[0].title;
 
+    //unique query string
     var rndm = Math.floor(Math.random() * 10000);
+    var action = Confirmit._pageView._pageForm[0].action
     var action = document.getElementById("page_form").getAttribute("action");
     action = action + "?acc=" + rndm; 
     document.getElementById("page_form").setAttribute("action", action);
 
+    //layout roles
     document.getElementsByClassName("cf-page__hidden-fields")[0].setAttribute("aria-hidden", "true");
     document.getElementsByClassName("cf-page__header")[0].setAttribute("role", "banner");
     document.getElementsByClassName("cf-page__main")[0].setAttribute("role", "main");
 
+    //progress bar 
     var progBar = document.getElementsByClassName("cf-progress__indicator");
     if(progBar[0]) {
       var accProgress = document.createElement("div");
@@ -295,24 +300,29 @@ var acclib = (function AccModule() {
       progBar[0].parentNode.parentNode.appendChild(accProgress);
     }
 
+    //navigation buttons
     document.getElementsByClassName("cf-page__navigation")[0].setAttribute("role", "navigation");
     var navButtons = document.getElementsByClassName("cf-navigation__button");
     for(var i = 0; i < navButtons.length; i++) {
-      navButtons[i].setAttribute("role", "presentation");
       navButtons[i].setAttribute("tabindex", "0");
     }
 
-    CheckAltTags();
-    ToastAlert();
+    //outline to show focus    
+    var css='div[tabindex^="0"]:focus, div[tabindex^="-1"]:focus, input:focus, textarea:focus, button:focus{outline:2px solid #42bdd1;outline-offset:1px;}';
+    head = document.head || document.getElementsByTagName('head')[0],
+    style=document.createElement('style');
+    style.type = 'text/css';
+    if (style.styleSheet){
+        style.styleSheet.cssText = css;
+    } 
+    else {
+        style.appendChild(document.createTextNode(css));
+    }
+    head.appendChild(style);
 
-
-
-    function CheckAltTags() {
-      /*
-      * alert designer if they've added images without alt attribute
-      */
-      var elems = document.getElementsByTagName('img');
-      for(var i = 0; i < elems.length; i++) {
+    //alert designer about images without alt attribute
+    var elems = document.getElementsByTagName('img');
+    for(var i = 0; i < elems.length; i++) {
         var a = elems[i].getAttribute('alt');
         if( !a || a == "") {
           console.log(elems[i].outerHTML + " is missing an Alt attribute");
@@ -320,39 +330,33 @@ var acclib = (function AccModule() {
         else if( a.toString().length > 125 ) {
           console.log(elems[i].outerHTML + " needs a shorter Alt attribute");
         }
-      }
     }
-
-    function ToastAlert() {
-      /*
-      * setting and unsetting the alert role for the "toast" modal window error popup
-      */
-      var toast = document.getElementsByClassName("cf-toast")[0];
-      var config = { attributes: true, subtree: true };
-      var observer = new MutationObserver(function(mutations) {
+    
+    //handling toast error modal's alert role 
+    var toast = document.getElementsByClassName("cf-toast")[0];
+    var config = { attributes: true, subtree: true };
+    var observer = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
-          if(mutation.attributeName == "class") {
-            ToggleAlert();
-          }
+            if(mutation.attributeName == "class") {
+                ToggleAlert();
+            }
         });
-      });
-      //listening to the page's toast area
-      observer.observe(toast, config);
-
-      function ToggleAlert() {
+    });
+    observer.observe(toast, config);
+    function ToggleAlert() {
         var cl = toast.classList.value;
         if( cl.indexOf("--hidden") !== -1 ) {
-          if( toast.hasAttribute("role") ) {  //if element is hidden
-            toast.removeAttribute("role");
-          }
+            if( toast.hasAttribute("role") ) {  //if element is hidden
+                toast.removeAttribute("role");
+            }
         }
         else {
-          if( !toast.hasAttribute("role") ) {  //if element is not hidden (error state)
-            toast.setAttribute("role", "alert");
-          }
+            if( !toast.hasAttribute("role") ) {  //if element is not hidden (error state)
+                toast.setAttribute("role", "alert");
+            }
         }
-      }
     }
+
   }//---------------------------------------------------END-PAGE-FUNCTION-----------
 
   
