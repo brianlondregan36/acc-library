@@ -367,9 +367,8 @@ var acclib = (function AccModule() {
 
   
 
-  function PopUpSupport() {
-    //new stuff for digital feedback... 
-    var webUrl = "https://author.us.confirmit.com"; //this should be the website domain you're deploying DF to
+  function PopUpSupport(webUrl) {
+    //for digital feedback, webUrl is the website domain you're deploying DF to 
     if (InsideDF) {
       window.parent.postMessage("OPEN", webUrl); //let container known this has loaded
       var allFocusElems = document.body.querySelectorAll('button, [href], input:not([type="hidden"]), select, textarea, [tabindex]:not([tabindex="-1"])');
