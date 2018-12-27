@@ -413,7 +413,7 @@ var acclib = (function AccModule() {
 
   return {
     SetUpPage: SetUpPage, 
-    SetUpQuestions: SetUpQuestions
+    SetUpQuestions: SetUpQuestions,
     PopUpSupport: PopUpSupport
   }; 
 
