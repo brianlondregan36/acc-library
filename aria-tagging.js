@@ -367,10 +367,54 @@ var acclib = (function AccModule() {
 
   
 
+  function PopUpSupport() {
+    //new stuff for digital feedback... 
+    var webUrl = "https://author.us.confirmit.com"; //this should be the website domain you're deploying DF to
+    if (InsideDF) {
+      window.parent.postMessage("OPEN", webUrl); //let container known this has loaded
+      var allFocusElems = document.body.querySelectorAll('button, [href], input:not([type="hidden"]), select, textarea, [tabindex]:not([tabindex="-1"])');
+      var firstElem = allFocusElems[0];
+      firstElem.addEventListener("keydown", function(e) { //moving backwards to top (x)
+        if(e.shiftKey && e.key === 'Tab') { //tabbing backward
+          window.parent.postMessage("MTT", webUrl); //tell container to Move focus To the Top of container so the (x) button
+          e.preventDefault();
+        }
+      });
+      var lastElem = allFocusElems[allFocusElems.length-1];
+      lastElem.addEventListener("keydown", function(e) { //moving forwards to top (x)
+        if(!e.shiftKey && e.key === 'Tab') { //tabbing forward
+          window.parent.postMessage("MTT", webUrl); //tell container to Move focus To the Top of container so the (x) button
+          e.preventDefault();
+        }
+      });
+      window.addEventListener("message", receiveMessage, false);
+    }
+    function receiveMessage(event) {
+      if (event.origin !== webUrl) {
+        return 0;
+      }
+      if (event.data === "MIF") { //received a message to Move focus Into the Frame so first focusable elem in survey
+        firstElem.focus();
+      }
+      else if (event.data === "MTB") { //received a message to Move focus To the Bottom of the survey so last focusable elem
+        lastElem.focus();
+      }
+    }
+    function InsideDF () {
+      try { //am I in an iframe i.e. Digital Feedback popup?
+        return window.self !== window.top;
+      } catch (e) {
+        return true;
+      }
+    }
+  }//--------------------------------------------------END-POPUP-FUNCTION-----------
+
+
 
   return {
     SetUpPage: SetUpPage, 
     SetUpQuestions: SetUpQuestions
+    PopUpSupport: PopUpSupport
   }; 
 
 })();
