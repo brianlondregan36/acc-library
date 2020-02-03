@@ -7,7 +7,7 @@ This is a Javascript module developed to make our Responsive Rendering layouts a
 3. Phase 3 is to support Digital Feedback popup programs. 
 
 ## USEAGE
---------------------------------------------------
+
 1. Every active theme in the project will need to reference two external JS files:
    - Reference the module (and specify the version you want) via https://cdn.jsdelivr.net/gh/brianlondregan36/acc-library@X.X/aria-tagging.js
    - JQuery will also need to be referenced
@@ -15,11 +15,11 @@ This is a Javascript module developed to make our Responsive Rendering layouts a
 
 EXAMPLE...  
 
-'''
+```
 acclib.SetUpPage();
 acclib.SetUpQuestions(); 
 acclib.PopUpSupport("https://my.domain.com"); 
-'''
+```
 
 SetUpPage()
   - This will set up the page...
