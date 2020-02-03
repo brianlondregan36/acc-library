@@ -40,7 +40,11 @@ PopUpSupport()
  - This will send messages to the webpage that triggered this survey to help...
    - keep the focus in the popup window 
    - keep the tab order correct
- - As a parameter, pass in the domain of your webpage that's triggering this survey!
+ - As a parameter, pass in the domain of your webpage that's triggering this survey
  - Only use this if this survey is part of a Digital Feedback program! For this to work you also need...
    - digital-feedback.js has the "Scenario" code for your Digital Feedback program
    - the invite and container need changes to the markup, see Program ID 20 for an example
+
+### Demo
+[Normal Web Survey](https://survey.us.confirmit.com/wix/p3085068453.aspx)
+[Digital Feedback Popup Survey](https://author.us.confirmit.com/isa/BDJPFRDMEYBPBKLVADAYFQCDAVIOEQJR/BrianL/df_accessible.html)
