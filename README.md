@@ -37,13 +37,15 @@ SetUpQuestions()
     - provide the code to handle keyboard operations
 
 PopUpSupport() 
- - This will send messages to the webpage that triggered this survey to help...
+ - Only use this if this survey is part of a Digital Feedback program! 
+ - This will send messages to the webpage that triggered this popup survey to help...
    - keep the focus in the popup window 
    - keep the tab order correct
- - As a parameter, pass in the domain of your webpage that's triggering this survey
- - Only use this if this survey is part of a Digital Feedback program! For this to work you also need...
-   - digital-feedback.js has the "Scenario" code for your Digital Feedback program
-   - the invite and container need changes to the markup, see Program ID 20 for an example
+ from the Survey: 
+ 1. call function and with it, pass in the domain of your webpage that's triggering this survey
+ from the DF Program: 
+ 1. digital-feedback.js has the "Scenario" code for your Digital Feedback program (you might need to change line 92 to match the survey domain)
+ 2. the invite and container need changes to the markup, see Program ID 20 for an example
 
 ### Demo
 [Normal Web Survey](https://survey.us.confirmit.com/wix/p3085068453.aspx)
